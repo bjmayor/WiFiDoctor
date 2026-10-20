@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+import AppKit
 
 // MARK: - 菜单栏图标
 
@@ -39,10 +40,12 @@ struct MenuBarLabel: View {
     }
 }
 
+
 // MARK: - 悬浮面板
 
 struct MonitorPanel: View {
     @Bindable var monitor: NetworkMonitor
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -131,6 +134,16 @@ struct MonitorPanel: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
+            Button {
+                openWindow(id: "main")
+                NSApp.activate(ignoringOtherApps: true)
+            } label: {
+                Label("独立窗口", systemImage: "macwindow")
+                    .font(.caption)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
             Button {
                 Task { await monitor.requestRecoveryNow() }
             } label: {
