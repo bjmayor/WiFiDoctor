@@ -58,7 +58,23 @@ open ~/Applications/WiFiDoctor.app
 
 需要 macOS 14+、Xcode 16+。
 
-### 后台守护（推荐）
+###开机自启（可选）
+
+```bash
+sed "s/com.example/__YOUR_PREFIX__/g" \
+  scripts/com.example.wifidoctor.launch.plist \
+  > ~/Library/LaunchAgents/com.$(whoami).wifidoctor.launch.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.$(whoami).wifidoctor.launch.plist
+```
+
+每60 秒巡检一次，App 不在就拉起（实测崩溃后约 35 秒恢复）。
+取消自启：`launchctl bootout gui/$(id -u)/com.$(whoami).wifidoctor.launch`
+
+### 后台守护脚本（可选）
+
+App 内置的自动重连已带冷却与次数上限（15 分钟/次、5 次/小时），
+通常不需要额外的守护脚本。以下适用于想要**更细粒度日志**或
+**让守护逻辑独立于 App 运行**的场景。
 
 把脚本放到非受保护目录（`~/Documents` 会被 launchd 拒绝读取），然后注册为 LaunchAgent：
 

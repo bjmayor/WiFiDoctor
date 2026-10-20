@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>com.example.wifidoctor.launch</string>
+
+    <!-- 每 60 秒巡检一次；App 不在就拉起。
+         用 StartInterval 而非 KeepAlive：KeepAlive 会让这个 bash 进程自己
+         也被反复重启，反而变成不断 open 的循环。 -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>pgrep -x WiFiDoctor &gt;/dev/null 2&gt;&amp;1 &amp;&amp; exit 0
+for i in 1 2 3; do
+  open -g -a "$HOME/Applications/WiFiDoctor.app" 2&gt;/dev/null &amp;&amp; exit 0
+  open -g -a /Applications/WiFiDoctor.app 2&gt;/dev/null &amp;&amp; exit 0
+  sleep 4
+done
+exit 0</string>
+    </array>
+
+    <key>RunAtLoad</key><true/>
+    <key>StartInterval</key><integer>60</integer>
+    <key>LowPriorityIO</key><true/>
+
+    <key>StandardOutPath</key><string>/tmp/wifidoctor-launch.log</string>
+    <key>StandardErrorPath</key><string>/tmp/wifidoctor-launch.err</string>
+</dict>
+</plist>
