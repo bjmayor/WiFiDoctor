@@ -1,0 +1,54 @@
+{
+  "": {
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/master.swiftdeps"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/Collectors/CoreWLANLinkInfoProvider.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/CoreWLANLinkInfoProvider.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/CoreWLANLinkInfoProvider.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/CoreWLANLinkInfoProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/CoreWLANLinkInfoProvider.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/CoreWLANLinkInfoProvider.dia"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/Collectors/ProcessProvider.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/ProcessProvider.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/ProcessProvider.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/ProcessProvider~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/ProcessProvider.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/ProcessProvider.dia"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/Models/Sample.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/Sample.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/Sample.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/Sample~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/Sample.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/Sample.dia"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/NetworkMonitor.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkMonitor.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkMonitor.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkMonitor~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkMonitor.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkMonitor.dia"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/Recovery/NetworkRecovery.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkRecovery.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkRecovery.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkRecovery~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkRecovery.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/NetworkRecovery.dia"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/Views/MonitorViews.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/MonitorViews.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/MonitorViews.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/MonitorViews~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/MonitorViews.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/MonitorViews.dia"
+  },
+  "/Users/maynard/data/codestation/git/WiFiDoctor/WiFiDoctor/WiFiDoctorApp.swift": {
+    "dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/WiFiDoctorApp.d",
+    "object": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/WiFiDoctorApp.swift.o",
+    "swiftmodule": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/WiFiDoctorApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/WiFiDoctorApp.swiftdeps",
+    "diagnostics": "/Users/maynard/data/codestation/git/WiFiDoctor/.build/arm64-apple-macosx/debug/WiFiDoctor.build/WiFiDoctorApp.dia"
+  }
+}
