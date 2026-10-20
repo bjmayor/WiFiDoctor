@@ -19,6 +19,7 @@ final class NetworkMonitor {
     private(set) var isRunning = false
     private(set) var lastRecoveryAt: Date?
 
+    private let throughput = ThroughputCounter()
     private var task: Task<Void, Never>?
     private var consecutiveBad = 0
     private var badSince: Date?
@@ -94,6 +95,8 @@ final class NetworkMonitor {
             gwRTT = r.averageRTT
         }
 
+        let tp = await throughput.sample(interface: iface)
+
         let net = await proc.ping(host: "1.1.1.1", count: 4)
 
         let sample = Sample(
@@ -105,6 +108,8 @@ final class NetworkMonitor {
             noise: onWiFi ? info?.noise : nil,
             channel: onWiFi ? info?.channel : nil,
             txRateMbps: onWiFi ? info?.txRateMbps : nil,
+            downMbps: tp.down,
+            upMbps: tp.up,
             gatewayLoss: gwLoss,
             gatewayRTT: gwRTT,
             netLoss: net.lossPercent,
@@ -122,10 +127,11 @@ final class NetworkMonitor {
             if let h = FileHandle(forWritingAtPath: path) {
                 defer { try? h.close() }
                 let gw = fmtDouble(sample.gatewayLoss), gr = fmtDouble(sample.gatewayRTT)
-                let line = String(format: "[%@] if=%@ link=%@ rssi=%@ ch=%@ rate=%@ gw=%@%%/%@ms net=%.0f%%/%.0fms\n",
+                let line = String(format: "[%@] if=%@ link=%@ rssi=%@ ch=%@ rate=%@ down=%.1fM up=%.1fM gw=%@%%/%@ms net=%.0f%%/%.0fms\n",
                              Self.fmt(sample.timestamp), sample.interfaceName, sample.isUp ? "UP" : "DOWN",
                              sample.rssi.map(String.init) ?? "-", sample.channel ?? "-",
-                             sample.txRateMbps.map(String.init) ?? "-", gw, gr, sample.netLoss, sample.netRTT)
+                             sample.txRateMbps.map(String.init) ?? "-", sample.downMbps, sample.upMbps,
+                             gw, gr, sample.netLoss, sample.netRTT)
                 h.seekToEndOfFile(); h.write(line.data(using: .utf8)!)
             }
             let gw = fmtDouble(sample.gatewayLoss), gr = fmtDouble(sample.gatewayRTT)

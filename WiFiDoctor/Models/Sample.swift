@@ -17,6 +17,9 @@ struct Sample: Identifiable, Sendable {
     var noise: Int?
     var channel: String?
     var txRateMbps: Int?
+    /// 实际下行/上行速率（Mbps，来自网卡字节计数差分）
+    var downMbps: Double = 0
+    var upMbps: Double = 0
 
     /// 到默认网关的丢包率(%) / 延迟(ms)
     var gatewayLoss: Double?
@@ -33,6 +36,8 @@ struct Sample: Identifiable, Sendable {
          noise: Int? = nil,
          channel: String? = nil,
          txRateMbps: Int? = nil,
+         downMbps: Double = 0,
+         upMbps: Double = 0,
          gatewayLoss: Double? = nil,
          gatewayRTT: Double? = nil,
          netLoss: Double = 0,
@@ -45,6 +50,8 @@ struct Sample: Identifiable, Sendable {
         self.noise = noise
         self.channel = channel
         self.txRateMbps = txRateMbps
+        self.downMbps = downMbps
+        self.upMbps = upMbps
         self.gatewayLoss = gatewayLoss
         self.gatewayRTT = gatewayRTT
         self.netLoss = netLoss

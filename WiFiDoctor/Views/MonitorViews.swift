@@ -6,34 +6,35 @@ import Charts
 struct MenuBarLabel: View {
     let quality: Quality
     let loss: Double
+    let rtt: Double
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 3) {
+            // 用趋势图图标，避免和系统 Wi-Fi 图标撞脸
             Image(systemName: symbol)
-                .foregroundStyle(color)
-            if loss > 0 {
-                Text("\(Int(loss))")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(color)
-                    .monospacedDigit()
-            }
+            // 丢包率常显，网络正常时显示 0
+            Text("\(Int(loss.rounded()))%")
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .monospacedDigit()
         }
+        .foregroundStyle(.primary)
+        .help(tooltip)
     }
 
     private var symbol: String {
         switch quality {
-        case .good: "wifi"
-        case .fair: "wifi.exclamationmark"
-        case .poor: "wifi.slash"
+        case .good: "chart.line.uptrend.xyaxis"
+        case .fair: "chart.line.uptrend.xyaxis"
+        case .poor: "exclamationmark.triangle.fill"
         case .down: "wifi.slash"
         }
     }
 
-    private var color: Color {
+    private var tooltip: String {
         switch quality {
-        case .good: .green
-        case .fair: .orange
-        case .poor, .down: .red
+        case .good: "网络正常 · 延迟 \(Int(rtt))ms"
+        case .fair: "网络一般 · 丢包 \(Int(loss))% · 延迟 \(Int(rtt))ms"
+        case .poor, .down: "网络很差 · 丢包 \(Int(loss))% · 延迟 \(Int(rtt))ms"
         }
     }
 }
@@ -81,7 +82,8 @@ struct MonitorPanel: View {
             stat("延迟", String(format: "%.0fms", st.avgRTT), .primary)
             stat("信号", latest?.rssi.map { "\($0)dBm" } ?? "—",
                  (latest?.rssi ?? -100) <= -75 ? .orange : .primary)
-            stat("速率", latest?.txRateMbps.map { "\($0)M" } ?? "—", .primary)
+            stat("下载", latest.map { String(format: "%.1fM", $0.downMbps) } ?? "—", .primary)
+            stat("上传", latest.map { String(format: "%.1fM", $0.upMbps) } ?? "—", .primary)
         }
         .padding(.vertical, 8)
         .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
@@ -125,15 +127,18 @@ struct MonitorPanel: View {
     private var footer: some View {
         HStack {
             if let r = latest {
-                Text("\(r.interfaceName) · \(r.channel ?? "—") · \(r.isWiFi ? "Wi-Fi" : "其他链路")")
+                Text("\(r.interfaceName) · \(r.channel ?? "—") · 协商 \(r.txRateMbps.map { "\($0)M" } ?? "—")")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("立即重连") {
+            Button {
                 Task { await monitor.requestRecoveryNow() }
+            } label: {
+                Label("立即重连", systemImage: "arrow.clockwise")
+                    .font(.caption)
             }
-            .buttonStyle(.borderless)
-            .font(.caption)
+            .buttonStyle(.bordered)
+            .controlSize(.small)
         }
     }
 }
