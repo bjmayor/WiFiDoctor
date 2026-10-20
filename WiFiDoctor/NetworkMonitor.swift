@@ -12,6 +12,8 @@ final class NetworkMonitor {
     var badThresholdLoss: Double = 40          // 丢包 ≥40% 记为“差”
     var badDurationToWarn: TimeInterval = 300  // 持续 5 分钟才通知
     var consecutiveBadToRecover = 3           // 连续 N 次采样差则尝试恢复
+    var recoveryCooldown: TimeInterval = 900   // 两次恢复之间的冷却（秒）
+    var maxRecoveriesPerHour = 5               // 一小时内最多恢复几次
 
     // MARK: - 状态
     private(set) var samples: [Sample] = []
@@ -24,6 +26,8 @@ final class NetworkMonitor {
     private var consecutiveBad = 0
     private var badSince: Date?
     private var warnedForCurrentEpisode = false
+    private var recoveryTimestamps: [Date] = []
+    private var lastRecoveryAtTime: Date?
 
     // MARK: - 依赖（默认自用版；上架时替换）
     private let proc: ProcessProviding = DefaultProcessProvider()
@@ -164,14 +168,32 @@ final class NetworkMonitor {
                 Task { await notifyBad(avgLoss: localLoss) }
             }
 
-            // 连续差 → 尝试恢复
+            // 连续差 → 尝试恢复（带冷却与次数上限，避免疯狂重启 Wi-Fi）
             if consecutiveBad >= consecutiveBadToRecover, recovery.isAvailable {
-                let reason = "连续 \(consecutiveBad) 次采样丢包 \(Int(localLoss))%"
                 consecutiveBad = 0
-                lastRecoveryAt = Date()
-                Task {
-                    await recovery.restore(reason: reason)
-                    await notifyRecovered()
+                let now = Date()
+
+                // 清理一小时前的记录
+                recoveryTimestamps.removeAll { now.timeIntervalSince($0) > 3600 }
+
+                let cooledDown = lastRecoveryAtTime.map { now.timeIntervalSince($0) >= recoveryCooldown } ?? true
+                let underLimit = recoveryTimestamps.count < maxRecoveriesPerHour
+
+                if cooledDown && underLimit {
+                    recoveryTimestamps.append(now)
+                    lastRecoveryAtTime = now
+                    lastRecoveryAt = now
+                    let reason = "连续采样丢包 \(Int(localLoss))%"
+                    Task {
+                        await recovery.restore(reason: reason)
+                        await notifyRecovered()
+                    }
+                } else if !underLimit {
+                    // 已达上限：停止折腾 Wi-Fi，改为提醒用户
+                    if !warnedForCurrentEpisode {
+                        warnedForCurrentEpisode = true
+                        Task { await notifyGiveUp() }
+                    }
                 }
             }
         } else {
@@ -198,6 +220,16 @@ final class NetworkMonitor {
         content.body = String(format: "已持续 %.0f 分钟，丢包约 %d%%。建议把大任务留到网络空档。", badDurationToWarn / 60, Int(avgLoss))
         content.sound = .default
         let req = UNNotificationRequest(identifier: "bad-\(UUID().uuidString)", content: content, trigger: nil)
+        try? await UNUserNotificationCenter.current().add(req)
+    }
+
+    private func notifyGiveUp() async {
+        guard await requestAuth() else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "自动修复已暂停"
+        content.body = "1 小时内已尝试修复 \(maxRecoveriesPerHour) 次仍未成功。可能是酒店整体故障，建议改用手机热点或换个位置。"
+        content.sound = .default
+        let req = UNNotificationRequest(identifier: "giveup-\(UUID().uuidString)", content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(req)
     }
 
