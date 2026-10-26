@@ -33,13 +33,13 @@ if ! grep -q "^$YESTERDAY" "$LOG_SRC"; then
 else
   cd "$REPO" || exit 1
   {
-    echo "【按小时】"
+    echo "【按小时 · 分链路】"
     echo
-    python3 wifi-report.py --log "$LOG_SRC" --bin 60 --date "$YESTERDAY"
+    python3 wifi-report.py --log "$LOG_SRC" --bin 60 --date "$YESTERDAY" --iface all
     echo
-    echo "【按 30 分钟】"
+    echo "【按 30 分钟 · Wi-Fi】"
     echo
-    python3 wifi-report.py --log "$LOG_SRC" --bin 30 --date "$YESTERDAY"
+    python3 wifi-report.py --log "$LOG_SRC" --bin 30 --date "$YESTERDAY" --iface en0
   } >> "$OUT" 2>&1
 fi
 

@@ -140,8 +140,13 @@ grep -E "net=(50|75|100)\.0%" ~/wifi-watch.log  # 严重丢包
 想知道「这家酒店几点抢带宽」，用内置脚本：
 
 ```bash
-python3 wifi-report.py --bin 30 --date 2026-10-20
+python3 wifi-report.py --bin 30 --date 2026-10-20          # 只看 Wi-Fi
+python3 wifi-report.py --bin 30 --iface all                # Wi-Fi 与热点各出一张表
+python3 wifi-report.py --bin 30 --iface en8                # 只看热点
 ```
+
+`--iface all` 会把 Wi-Fi（en0）和手机热点（en8）分开统计，方便判断
+「到底是酒店烂还是基站烂」。热点没有协商速率与 RSSI，评价主要看丢包和延迟。
 
 输出类似：
 
