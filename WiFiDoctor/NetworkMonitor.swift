@@ -21,6 +21,7 @@ final class NetworkMonitor {
     private(set) var currentQuality: Quality = .good
     private(set) var isRunning = false
     private(set) var lastRecoveryAt: Date?
+    private(set) var lastIsBad = false
 
     private let throughput = ThroughputCounter()
     private var task: Task<Void, Never>?
@@ -132,18 +133,16 @@ final class NetworkMonitor {
             if let h = FileHandle(forWritingAtPath: path) {
                 defer { try? h.close() }
                 let gw = fmtDouble(sample.gatewayLoss), gr = fmtDouble(sample.gatewayRTT)
-                let line = String(format: "[%@] if=%@ link=%@ rssi=%@ ch=%@ rate=%@ down=%.1fM up=%.1fM gw=%@%%/%@ms net=%.0f%%/%.0fms\n",
-                             Self.fmt(sample.timestamp), sample.interfaceName, sample.isUp ? "UP" : "DOWN",
-                             sample.rssi.map(String.init) ?? "-", sample.channel ?? "-",
-                             sample.txRateMbps.map(String.init) ?? "-", sample.downMbps, sample.upMbps,
-                             gw, gr, sample.netLoss, sample.netRTT)
+                let line = String(
+                    format: "[%@] if=%@ link=%@ wifi=%@ rssi=%@ ch=%@ rate=%@ down=%.1fM up=%.1fM gw=%@%%/%@ms net=%.0f%%/%.0fms bad=%d\n",
+                    Self.fmt(sample.timestamp), sample.interfaceName,
+                    sample.isWiFi ? (sample.isUp ? "UP" : "DOWN") : "n/a",
+                    sample.isWiFi ? "1" : "0",
+                    sample.rssi.map(String.init) ?? "-", sample.channel ?? "-",
+                    sample.txRateMbps.map(String.init) ?? "-", sample.downMbps, sample.upMbps,
+                    gw, gr, sample.netLoss, sample.netRTT, lastIsBad ? 1 : 0)
                 h.seekToEndOfFile(); h.write(line.data(using: .utf8)!)
             }
-            let gw = fmtDouble(sample.gatewayLoss), gr = fmtDouble(sample.gatewayRTT)
-            print(String(format: "[%@] if=%@ link=%@ rssi=%@ ch=%@ rate=%@ gw=%@%%/%@ms net=%.0f%%/%.0fms",
-                         Self.fmt(sample.timestamp), sample.interfaceName, sample.isUp ? "UP" : "DOWN",
-                         sample.rssi.map(String.init) ?? "-", sample.channel ?? "-",
-                         sample.txRateMbps.map(String.init) ?? "-", gw, gr, sample.netLoss, sample.netRTT))
         }
         #endif
     }
@@ -155,7 +154,12 @@ final class NetworkMonitor {
         let localLoss = s.gatewayLoss ?? s.netLoss
         currentQuality = Quality(loss: localLoss, rtt: s.netRTT)
 
-        let isBad = !s.isUp || localLoss >= badThresholdLoss
+        // 只有在 Wi-Fi 上时才用 CoreWLAN 的链路状态。
+        // 用热点时 Wi-Fi 是关的（isUp=false），若直接判定会永远认为"断开"，
+        // 于是丢包 0% 也会弹"网络很差"的通知（曾出现过）。
+        let linkDown = s.isWiFi && !s.isUp
+        let isBad = linkDown || localLoss >= badThresholdLoss
+        lastIsBad = isBad
 
         // 关键护栏：不在 Wi-Fi 上（例如在用手机热点）时，绝不累计恢复计数，
         // 否则蜂窝一卡就会去动 Wi-Fi，把用户从热点踢回 Wi-Fi。
@@ -172,7 +176,8 @@ final class NetworkMonitor {
                let since = badSince,
                s.timestamp.timeIntervalSince(since) >= badDurationToWarn {
                 warnedForCurrentEpisode = true
-                Task { await notifyBad(avgLoss: localLoss) }
+                let reason: BadReason = linkDown ? .linkDown : .lossy(localLoss)
+                Task { await notifyBad(reason: reason) }
             }
 
             // 连续差 → 尝试恢复（带冷却与次数上限，避免疯狂重启 Wi-Fi）
@@ -223,11 +228,22 @@ final class NetworkMonitor {
             .requestAuthorization(options: [.alert, .sound])) ?? false
     }
 
-    private func notifyBad(avgLoss: Double) async {
+    /// 徽章/通知里区分"断了"和"能通但很差"
+    enum BadReason {
+        case linkDown
+        case lossy(Double)
+    }
+
+    private func notifyBad(reason: BadReason) async {
         guard await requestAuth() else { return }
         let content = UNMutableNotificationContent()
         content.title = "网络很差，先去做别的"
-        content.body = String(format: "已持续 %.0f 分钟，丢包约 %d%%。建议把大任务留到网络空档。", badDurationToWarn / 60, Int(avgLoss))
+        switch reason {
+        case .linkDown:
+            content.body = String(format: "链路已断开超过 %.0f 分钟。建议先检查 Wi-Fi，或切到手机热点。", badDurationToWarn / 60)
+        case .lossy(let loss):
+            content.body = String(format: "已持续 %.0f 分钟，丢包约 %d%%。建议把大任务留到网络空档。", badDurationToWarn / 60, Int(loss))
+        }
         content.sound = .default
         let req = UNNotificationRequest(identifier: "bad-\(UUID().uuidString)", content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(req)
