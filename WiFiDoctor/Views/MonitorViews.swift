@@ -129,8 +129,14 @@ struct MonitorPanel: View {
 
     private var footer: some View {
         HStack {
+            Toggle(isOn: $monitor.autoRecoveryEnabled) {
+                Text("自动修复").font(.caption)
+            }
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+
             if let r = latest {
-                Text("\(r.interfaceName) · \(r.channel ?? "—") · 协商 \(r.txRateMbps.map { "\($0)M" } ?? "—")")
+                Text("\(r.interfaceName) · \(r.channel ?? "—")")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()

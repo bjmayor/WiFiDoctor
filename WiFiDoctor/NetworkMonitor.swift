@@ -12,6 +12,7 @@ final class NetworkMonitor {
     var badThresholdLoss: Double = 40          // 丢包 ≥40% 记为“差”
     var badDurationToWarn: TimeInterval = 300  // 持续 5 分钟才通知
     var consecutiveBadToRecover = 3           // 连续 N 次采样差则尝试恢复
+    var autoRecoveryEnabled = true             // 用户总开关：关掉后只监测不干预
     var recoveryCooldown: TimeInterval = 900   // 两次恢复之间的冷却（秒）
     var maxRecoveriesPerHour = 5               // 一小时内最多恢复几次
 
@@ -156,8 +157,14 @@ final class NetworkMonitor {
 
         let isBad = !s.isUp || localLoss >= badThresholdLoss
 
+        // 关键护栏：不在 Wi-Fi 上（例如在用手机热点）时，绝不累计恢复计数，
+        // 否则蜂窝一卡就会去动 Wi-Fi，把用户从热点踢回 Wi-Fi。
+        if !s.isWiFi {
+            consecutiveBad = 0
+        }
+
         if isBad {
-            consecutiveBad += 1
+            if s.isWiFi { consecutiveBad += 1 }
             badSince = badSince ?? s.timestamp
 
             // 持续够久 → 通知一次（每轮只提醒一次，别打扰）
@@ -169,7 +176,10 @@ final class NetworkMonitor {
             }
 
             // 连续差 → 尝试恢复（带冷却与次数上限，避免疯狂重启 Wi-Fi）
-            if consecutiveBad >= consecutiveBadToRecover, recovery.isAvailable {
+            if consecutiveBad >= consecutiveBadToRecover,
+               s.isWiFi,
+               autoRecoveryEnabled,
+               recovery.isAvailable {
                 consecutiveBad = 0
                 let now = Date()
 
