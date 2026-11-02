@@ -38,6 +38,21 @@ final class NetworkMonitor {
 
     private let maxSamples = 720   // 约 1 小时 @5s
 
+    /// 菜单栏显示的丢包率：取最近 3 次采样的中位数。
+    /// 单次 4 包探测全丢（例如运营商临时丢 ICMP）会让瞬时值跳到 100%，
+    /// 直接显示会造成"网络断了"的误判。
+    var displayLoss: Double {
+        let recent = samples.suffix(3).map(\.netLoss).sorted()
+        guard !recent.isEmpty else { return 0 }
+        return recent[recent.count / 2]
+    }
+
+    var displayRTT: Double {
+        let recent = samples.suffix(3).map(\.netRTT).sorted()
+        guard !recent.isEmpty else { return 0 }
+        return recent[recent.count / 2]
+    }
+
     var recentStats: Stats {
         Stats.from(samples.suffix(60))
     }

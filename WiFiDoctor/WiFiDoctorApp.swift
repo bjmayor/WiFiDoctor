@@ -18,8 +18,8 @@ struct WiFiDoctorApp: App {
         } label: {
             MenuBarLabel(
                 quality: monitor.currentQuality,
-                loss: monitor.samples.last?.netLoss ?? 0,
-                rtt: monitor.samples.last?.netRTT ?? 0
+                loss: monitor.displayLoss,
+                rtt: monitor.displayRTT
             )
         }
         .menuBarExtraStyle(.window)
