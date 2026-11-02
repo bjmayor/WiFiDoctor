@@ -20,6 +20,7 @@
 其中一次是「链路没断、能 ping 通，但网关丢包 75%」——**这种情况人工很难判断该不该重连，脚本能识别并自动处理。**
 
 > 完整实测数据见 [docs/EFFECT.md](docs/EFFECT.md)
+> 三种接入方式（酒店 Wi-Fi / LTE / 5G）的横向对比见 [docs/CASE-5G.md](docs/CASE-5G.md)
 
 ## 为什么会有这个工具
 
